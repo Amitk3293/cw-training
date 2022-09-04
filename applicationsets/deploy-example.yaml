@@ -9,8 +9,8 @@ spec:
       elements:
       - appName: prometheus
         namespace: monitoring
-      - appName: crossplane
-        namespace: crossplane-system
+      - appName: vmagent
+        namespace: vmetrics
   template:
     metadata:
       name: "{{appName}}"
