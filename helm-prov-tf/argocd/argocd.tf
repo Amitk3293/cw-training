@@ -31,10 +31,77 @@ resource "helm_release" "argo-cd" {
     EOF
   }
 
-    provisioner "local-exec" {
-    command = <<EOF
-      echo $(pwd) \
-      $(kubectl apply -f ./applicationsets/deploy-example.yaml)
-    EOF
+    # provisioner "local-exec" {
+    # command = <<EOF
+    #   echo $(pwd) \
+    #   $(kubectl apply -f ./applicationsets/deploy-example.yaml)
+    # EOF
+# }
 }
+
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+resource "kubernetes_manifest" "applicationset_argocd" {
+  manifest = {
+    "apiVersion" = "argoproj.io/v1alpha1"
+    "kind" = "ApplicationSet"
+    "metadata" = {
+      "name" = "argo-infra-appset"
+      "namespace" = "argo-cd"
+    }
+    "spec" = {
+      "generators" = [
+        {
+          "list" = {
+            "elements" = [
+              {
+                "appName" = "prometheus"
+                "namespace" = "monitoring"
+              },
+              {
+                "appName" = "rabbitmq"
+                "namespace" = "rabbitmq"
+              },
+            ]
+          }
+        },
+      ]
+      "template" = {
+        "metadata" = {
+          "annotations" = {
+            "argocd.argoproj.io/manifest-generate-paths" = ".;.."
+          }
+          "name" = "{{appName}}"
+        }
+        "spec" = {
+          "destination" = {
+            "name" = "in-cluster"
+            "namespace" = "{{namespace}}"
+          }
+          "project" = "default"
+          "source" = {
+            "helm" = {
+              "releaseName" = "{{appName}}"
+              "valueFiles" = [
+                "values.yaml",
+              ]
+            }
+            "path" = "applicationsets/infra/{{appName}}"
+            "repoURL" = "https://github.com/Amitk3293/cw-training.git"
+            "targetRevision" = "HEAD"
+          }
+          "syncPolicy" = {
+            "automated" = {
+              "prune" = true
+              "selfHeal" = true
+            }
+            "syncOptions" = [
+              "CreateNamespace=true",
+            ]
+          }
+        }
+      }
+    }
+  }
 }
