@@ -30,4 +30,11 @@ resource "helm_release" "argo-cd" {
       $(kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
     EOF
   }
+
+    provisioner "local-exec" {
+    command = <<EOF
+      echo $(pwd) \
+      $(kubectl apply -f ./applicationsets/deploy-example.yaml)
+    EOF
+}
 }
