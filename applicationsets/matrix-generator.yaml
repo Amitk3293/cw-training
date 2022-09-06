@@ -1,33 +1,39 @@
-# apiVersion: argoproj.io/v1alpha1
-# kind: ApplicationSet
-# metadata:
-#   name: cluster-git
-# spec:
-#   generators:
-#     # matrix 'parent' generator
-#     - matrix:
-#         generators:
-#           # git generator, 'child' #1
-#           - git:
-#               repoURL: https://github.com/Amitk3293/cw-training.git
-#               revision: HEAD
-#               directories:
-#                 - path: applicationsets/infra/*
-
-#           # cluster generator, 'child' #2
-#           - clusters:
-#               selector:
-#                 matchLabels:
-#                   argocd.argoproj.io/secret-type: cluster
-#   template:
-#     metadata:
-#       name: '{{path.basename}}-{{name}}'
-#     spec:
-#       project: '{{metadata.labels.environment}}'
-#       source:
-#         repoURL: https://github.com/argoproj-labs/applicationset.git
-#         targetRevision: HEAD
-#         path: '{{path}}'
-#       destination:
-#         server: '{{server}}'
-#         namespace: '{{path.basename}}'
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infra-apps
+  namespace: argo-cd
+spec:
+  generators:
+  - list:
+      elements:
+      - appName: rabbitmq
+        namespace: rabbitmq
+      - appName: prometheus
+        namespace: monitoring
+  template:
+    metadata:
+      name: "{{appName}}"
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: ".;.."
+    spec:
+      project: default
+      source:
+        chart: kube-prometheus-stack
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: HEAD
+        path: "applicationsets/infra/{{appName}}"
+        helm:
+          # Release name override (defaults to application name)
+          releaseName: "{{appName}}"
+          valueFiles:
+          - values.yaml
+      destination:
+        name: in-cluster
+        namespace: "{{namespace}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
