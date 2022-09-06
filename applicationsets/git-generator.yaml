@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-ifra
+  namespace: argo-cd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/Amitk3293/cw-training.git
+      revision: HEAD
+      directories:
+      - path: applicationsets/infra/*
+  template:
+    metadata:
+      name: '{{path[0]}}'
+    spec:
+      project: "default"
+      source:
+        repoURL: https://github.com/Amitk3293/cw-training.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
