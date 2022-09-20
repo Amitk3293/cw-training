@@ -104,4 +104,7 @@ resource "kubernetes_manifest" "applicationset_argocd" {
       }
     }
   }
+  depends_on = [
+    helm_release.argo-cd
+  ]
 }

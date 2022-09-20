@@ -7,10 +7,14 @@ spec:
   generators:
   - list:
       elements:
-      - appName: rabbitmq
-        namespace: rabbitmq
       - appName: prometheus
         namespace: monitoring
+      - appName: mysql
+        namespace: mysql
+      - appName: loft
+        namespace: loft
+      - appName: cert-manager
+        namespace: cert-manager
   template:
     metadata:
       name: "{{appName}}"
@@ -19,9 +23,6 @@ spec:
     spec:
       project: default
       source:
-        chart: kube-prometheus-stack
-        repoURL: https://prometheus-community.github.io/helm-charts
-        targetRevision: HEAD
         path: "applicationsets/infra/{{appName}}"
         helm:
           # Release name override (defaults to application name)
