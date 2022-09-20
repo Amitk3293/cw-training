@@ -7,6 +7,10 @@ spec:
   generators:
   - list:
       elements:
+      - cluster: in-cluster #engineering-dev
+        url: https://kubernetes.default.svc
+#     - cluster: engineering-prod
+#       url: https://kubernetes-dev.cellwize.com
       - appName: prometheus
         namespace: monitoring
       - appName: mysql
@@ -32,7 +36,7 @@ spec:
           valueFiles:
           - values.yaml
       destination:
-        name: in-cluster
+        name: "{{cluster}}"
         namespace: "{{namespace}}"
       syncPolicy:
         automated:
