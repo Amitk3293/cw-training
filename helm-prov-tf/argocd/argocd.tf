@@ -42,12 +42,12 @@ resource "helm_release" "argo-cd" {
 provider "kubernetes" {
   config_path = "~/.kube/config"
 }
-resource "kubernetes_manifest" "applicationset_argocd" {
+resource "kubernetes_manifest" "applicationset_argo_cd_infra_apps" {
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
     "kind" = "ApplicationSet"
     "metadata" = {
-      "name" = "argo-infra-appset"
+      "name" = "infra-apps"
       "namespace" = "argo-cd"
     }
     "spec" = {
