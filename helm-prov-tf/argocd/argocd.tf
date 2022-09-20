@@ -60,8 +60,16 @@ resource "kubernetes_manifest" "applicationset_argocd" {
                 "namespace" = "monitoring"
               },
               {
-                "appName" = "rabbitmq"
-                "namespace" = "rabbitmq"
+                "appName" = "mysql"
+                "namespace" = "mysql"
+              },
+              {
+                "appName" = "loft"
+                "namespace" = "loft"
+              },
+              {
+                "appName" = "cert-manager"
+                "namespace" = "cert-manager"
               },
             ]
           }
